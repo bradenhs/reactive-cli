@@ -40,11 +40,16 @@ var terminalKit = require("terminal-kit");
 var AppModel_1 = require("./models/AppModel");
 var fnx_1 = require("fnx");
 var axios_1 = require("axios");
+var boxen = require("boxen");
 var app = new AppModel_1.AppModel({
     transactions: {}
 });
 var term = terminalKit.terminal;
+setInterval(function () { return 0; }, 100);
 start();
+var STATUS_BAR_HEIGHT = 7;
+term.clear();
+term.moveTo(1, STATUS_BAR_HEIGHT);
 function start() {
     return __awaiter(this, void 0, void 0, function () {
         return __generator(this, function (_a) {
@@ -102,8 +107,7 @@ function setTransactionLocation(id) {
 function startQuestion() {
     term.clear();
     renderStatusBar();
-    console.log();
-    console.log();
+    term.moveTo(1, STATUS_BAR_HEIGHT);
 }
 fnx_1.reaction(function () {
     renderStatusBar();
@@ -111,11 +115,24 @@ fnx_1.reaction(function () {
 function renderStatusBar() {
     term.saveCursor();
     term.moveTo(1, 1);
-    var output = 'Total $' + app.getTotal();
+    erase(1, STATUS_BAR_HEIGHT);
+    var output = 'Total $' + app.getTotal() + '\n';
+    var lastTransactionLocation = 'None';
     if (app.getMostRecentTransaction() != undefined) {
-        var lastTransactionLocation = app.getMostRecentTransaction().location;
-        output += ' Last transaction location: ' + (lastTransactionLocation || 'Fetching...');
+        lastTransactionLocation = app.getMostRecentTransaction().location;
     }
-    term(output);
+    output += 'Last transaction location: ' + (lastTransactionLocation || 'Fetching...');
+    term(boxen(output, {
+        padding: 1,
+        borderColor: 'cyan'
+    }));
+    term.restoreCursor();
+}
+function erase(from, until) {
+    term.saveCursor();
+    for (var line = from; line <= until; line++) {
+        term.moveTo(1, line);
+        term.eraseLine();
+    }
     term.restoreCursor();
 }

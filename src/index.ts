@@ -3,6 +3,8 @@ import * as terminalKit from 'terminal-kit'
 import { AppModel } from './models/AppModel'
 import { reaction } from 'fnx'
 import axios from 'axios'
+import * as boxen from 'boxen'
+import { times } from 'lodash'
 
 const app = new AppModel({
   transactions: { }
@@ -10,7 +12,14 @@ const app = new AppModel({
 
 const term = terminalKit.terminal
 
+setInterval(() => 0, 100)
+
 start()
+
+const STATUS_BAR_HEIGHT = 7
+
+term.clear()
+term.moveTo(1, STATUS_BAR_HEIGHT)
 
 async function start() {
   term.clear()
@@ -39,11 +48,7 @@ async function setTransactionLocation(id) {
 function startQuestion() {
   term.clear()
   renderStatusBar()
-  console.log()
-  console.log()
-  console.log()
-  console.log()
-  console.log()
+  term.moveTo(1, STATUS_BAR_HEIGHT)
 }
 
 reaction(() => {
@@ -53,13 +58,25 @@ reaction(() => {
 function renderStatusBar() {
   term.saveCursor()
   term.moveTo(1, 1)
-  let output = 'Total $' + app.getTotal()
+  erase(1, STATUS_BAR_HEIGHT)
+  let output = 'Total $' + app.getTotal() + '\n'
+  let lastTransactionLocation = 'None'
   if (app.getMostRecentTransaction() != undefined) {
-    const lastTransactionLocation = app.getMostRecentTransaction().location
-    output += ' Last transaction location: ' +  (lastTransactionLocation || 'Fetching...')
+    lastTransactionLocation = app.getMostRecentTransaction().location
   }
-  term(output)
+  output += 'Last transaction location: ' +  (lastTransactionLocation || 'Fetching...')
+  term(boxen(output, {
+    padding: 1,
+    borderColor: 'cyan'
+  }))
   term.restoreCursor()
 }
 
-
+function erase(from, until) {
+  term.saveCursor()
+  for (let line = from; line <= until; line++) {
+    term.moveTo(1, line)
+    term.eraseLine()
+  }
+  term.restoreCursor()
+}
