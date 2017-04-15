@@ -41,6 +41,9 @@ function startQuestion() {
   renderStatusBar()
   console.log()
   console.log()
+  console.log()
+  console.log()
+  console.log()
 }
 
 reaction(() => {
