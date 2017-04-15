@@ -1,0 +1,11 @@
+{
+  "name": "reactive-cli",
+  "version": "1.0.0",
+  "main": "index.js",
+  "repository": "git@github.com:bradenhs/reactive-cli.git",
+  "author": "Braden Snell <bhsnll@gmail.com>",
+  "license": "MIT",
+  "dependencies": {
+    "inquirer": "^3.0.6"
+  }
+}
