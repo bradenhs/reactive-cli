@@ -14,14 +14,13 @@ const term = terminalKit.terminal
 
 start()
 
-
 function start() {
   const views = {
     [View.CHOOSE_NAME]: displayChooseName,
     [View.JOIN_OR_CREATE_SELECTION]: displayJoinOrCreateSelection,
     [View.CREATE_BUDGET]: displayCreateBudget,
     [View.JOIN_BUDGET]: displayJoinBudget,
-    [View.WITHDRAW_OR_DEPOSIT_SELECTION]: displayWithdrawOrDepositSelection,
+    [View.ACTION_SELECTION]: displayActionSelection,
     [View.DEPOSIT]: displayDepositSelection,
     [View.WITHDRAW]: displayWithdrawSelection,
   }
@@ -41,7 +40,7 @@ async function displayChooseName() {
     validate: required
   })
   app.transaction(() => {
-    app.setUserName(name)
+    app.setUserName(name.trim())
     app.setView(View.JOIN_OR_CREATE_SELECTION)
   })
 }
@@ -67,8 +66,8 @@ async function displayCreateBudget() {
     validate: required
   })
   app.transaction(() => {
-    app.createBudget(name)
-    app.setView(View.WITHDRAW_OR_DEPOSIT_SELECTION)
+    app.createBudget(name.trim())
+    app.setView(View.ACTION_SELECTION)
   })
 }
 
@@ -77,7 +76,7 @@ async function displayJoinBudget() {
   // app.setView(View.WITHDRAW_OR_DEPOSIT_SELECTION)
 }
 
-async function displayWithdrawOrDepositSelection() {
+async function displayActionSelection() {
   const { choice } = await inquirer.prompt({
     name: 'choice',
     message: 'Would you like to record a withdrawl or deposit?',
@@ -94,22 +93,24 @@ async function displayWithdrawOrDepositSelection() {
 async function displayDepositSelection() {
   const { amount } = await inquirer.prompt({
     name: 'amount',
-    message: 'How much would you like to deposit?'
+    message: 'How much would you like to deposit?',
+    validate: combineValidators(required, isNumber)
   })
   app.transaction(() => {
-    createTransaction(parseFloat(amount))
-    app.setView(View.WITHDRAW_OR_DEPOSIT_SELECTION)
+    createTransaction(parseFloat(amount.trim()))
+    app.setView(View.ACTION_SELECTION)
   })
 }
 
 async function displayWithdrawSelection() {
   const { amount } = await inquirer.prompt({
     name: 'amount',
-    message: 'How much would you like to withdraw?'
+    message: 'How much would you like to withdraw?',
+    validate: combineValidators(required, isNumber)
   })
   app.transaction(() => {
-    createTransaction(-parseFloat(amount))
-    app.setView(View.WITHDRAW_OR_DEPOSIT_SELECTION)
+    createTransaction(-parseFloat(amount.trim()))
+    app.setView(View.ACTION_SELECTION)
   })
 }
 
@@ -132,6 +133,14 @@ function combineValidators(...validators: ((value: string) => true | string)[]) 
       }
     }
     return true
+  }
+}
+
+function isNumber(value: string) {
+  if (/^\d+(\.\d+)?$/.test(value.trim())) {
+    return true
+  } else {
+    return 'Should be positive number'
   }
 }
 

@@ -58,10 +58,11 @@ function clearCurrentStatusBar() {
 }
 
 function formatMoney(amount: number) {
+  let amountString = Math.abs(amount).toFixed(2)
   if (amount < 0) {
-    return chalk.bold.red('-$' + Math.abs(amount).toString())
+    return chalk.bold.red('-$' + amountString)
   } else {
-    return chalk.bold.green('$' + amount.toString())
+    return chalk.bold.green('$' + amountString)
   }
 }
 
