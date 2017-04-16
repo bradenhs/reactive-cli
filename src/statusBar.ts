@@ -57,12 +57,16 @@ function clearCurrentStatusBar() {
   term.moveTo(1, 1)
 }
 
-function formatMoney(amount: number) {
+function formatMoney(amount: number, options?: { addSign: boolean }) {
   let amountString = Math.abs(amount).toFixed(2)
   if (amount < 0) {
     return chalk.bold.red('-$' + amountString)
   } else {
-    return chalk.bold.green('$' + amountString)
+    let str = '$' + amountString
+    if (options && options.addSign) {
+      str = '+' + str
+    }
+    return chalk.bold.green(str)
   }
 }
 
@@ -71,7 +75,7 @@ function formatTransaction(transaction: TransactionModel) {
     return chalk.gray.italic('No transactions recorded')
   }
   let formatted = ''
-  formatted += formatMoney(transaction.amount) + ' '
+  formatted += formatMoney(transaction.amount, { addSign: true }) + ' '
   formatted += 'from ' + (transaction.location || chalk.gray.italic('fetching...'))
   return formatted
 }

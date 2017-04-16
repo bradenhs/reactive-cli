@@ -9,6 +9,7 @@ import { initStatusBar, STATUS_BAR_HEIGHT } from './statusBar'
 import { app } from './app'
 import { View } from './models/AppModel'
 import fnx from 'fnx'
+import * as chalk from 'chalk'
 
 const term = terminalKit.terminal
 
@@ -77,23 +78,42 @@ async function displayJoinBudget() {
 }
 
 async function displayActionSelection() {
-  const { choice } = await inquirer.prompt({
-    name: 'choice',
-    message: 'Would you like to record a withdrawl or deposit?',
-    type: 'list',
-    choices: [ 'Widthdraw', 'Deposit' ]
-  })
-  if (choice === 'Widthdraw') {
-    app.setView(View.WITHDRAW)
-  } else {
-    app.setView(View.DEPOSIT)
+  let confirmShutdown: boolean
+  do {
+    const { choice } = await inquirer.prompt({
+      name: 'choice',
+      message: 'What would you like to do?',
+      type: 'list',
+      choices: [ 'Widthdraw', 'Deposit', 'Shutdown' ]
+    })
+    if (choice === 'Widthdraw') {
+      app.setView(View.WITHDRAW)
+      break
+    } else if (choice === 'Deposit') {
+      app.setView(View.DEPOSIT)
+      break
+    } else {
+      console.log(chalk.yellow(chalk.bold('Warning:') + ' If changes from your machine have not been'))
+      console.log(chalk.yellow('synced with a living node your changes will be lost!'))
+      console.log(chalk.yellow('If all machines in a budget disconnect your budget will'))
+      console.log(chalk.yellow('be lost forever...'))
+      confirmShutdown = (await inquirer.prompt({
+        name: 'confirm',
+        type: 'confirm',
+        message: 'Are you sure you\'d like to continue?',
+        default: false
+      })).confirm
+    }
+  } while (!confirmShutdown)
+  if (confirmShutdown) {
+    term.clear()
   }
 }
 
 async function displayDepositSelection() {
   const { amount } = await inquirer.prompt({
     name: 'amount',
-    message: 'How much would you like to deposit?',
+    message: 'How much would you like to deposit (in dollars)?',
     validate: combineValidators(required, isNumber)
   })
   app.transaction(() => {
@@ -105,7 +125,7 @@ async function displayDepositSelection() {
 async function displayWithdrawSelection() {
   const { amount } = await inquirer.prompt({
     name: 'amount',
-    message: 'How much would you like to withdraw?',
+    message: 'How much would you like to withdraw (in dollars)?',
     validate: combineValidators(required, isNumber)
   })
   app.transaction(() => {
