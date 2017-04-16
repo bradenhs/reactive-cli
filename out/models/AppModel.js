@@ -16,52 +16,60 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
     return c > 3 && r && Object.defineProperty(target, key, r), r;
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-var TransactionModel_1 = require("./TransactionModel");
+var BudgetModel_1 = require("./BudgetModel");
 var fnx_1 = require("fnx");
-var uuid = require("uuid");
+var View;
+(function (View) {
+    View[View["CHOOSE_NAME"] = 0] = "CHOOSE_NAME";
+    View[View["JOIN_OR_CREATE_SELECTION"] = 1] = "JOIN_OR_CREATE_SELECTION";
+    View[View["JOIN_BUDGET"] = 2] = "JOIN_BUDGET";
+    View[View["CREATE_BUDGET"] = 3] = "CREATE_BUDGET";
+    View[View["WITHDRAW_OR_DEPOSIT_SELECTION"] = 4] = "WITHDRAW_OR_DEPOSIT_SELECTION";
+    View[View["WITHDRAW"] = 5] = "WITHDRAW";
+    View[View["DEPOSIT"] = 6] = "DEPOSIT";
+})(View = exports.View || (exports.View = {}));
 var AppModel = (function (_super) {
     __extends(AppModel, _super);
     function AppModel() {
         var _this = _super !== null && _super.apply(this, arguments) || this;
-        _this.transactions = fnx_1.default.mapOf(fnx_1.default.object(TransactionModel_1.TransactionModel));
+        _this.budget = fnx_1.default.object(BudgetModel_1.BudgetModel);
+        _this.userName = fnx_1.default.string;
+        _this.view = fnx_1.default.number;
         return _this;
     }
-    AppModel.prototype.getTotal = function () {
-        var _this = this;
-        var total = 0;
-        Object.keys(this.transactions).forEach(function (id) {
-            total += _this.transactions[id].amount;
-        });
-        return total;
+    AppModel.prototype.setView = function (view) {
+        this.view = view;
     };
-    AppModel.prototype.getTransactionsOrderedByDateCreated = function () {
-        var _this = this;
-        return Object.keys(this.transactions).map(function (id) { return _this.transactions[id]; }).sort(function (t1, t2) {
-            return t1.created.valueOf() > t2.created.valueOf() ? 1 : -1;
-        });
+    AppModel.prototype.transaction = function (fn) {
+        fn();
     };
-    AppModel.prototype.getMostRecentTransaction = function () {
-        return this.getTransactionsOrderedByDateCreated()[0];
+    AppModel.prototype.setUserName = function (name) {
+        this.userName = name;
     };
-    AppModel.prototype.createTransaction = function (amount) {
-        var id = uuid.v4();
-        this.transactions[id] = {
-            amount: amount, id: id, created: new Date()
+    AppModel.prototype.createBudget = function (name) {
+        this.budget = {
+            budgetName: name,
+            transactions: {}
         };
-        return id;
     };
     return AppModel;
 }(fnx_1.default.Model));
 __decorate([
-    fnx_1.default.computed
-], AppModel.prototype, "getTotal", null);
+    fnx_1.default.optional
+], AppModel.prototype, "budget", void 0);
 __decorate([
-    fnx_1.default.computed
-], AppModel.prototype, "getTransactionsOrderedByDateCreated", null);
-__decorate([
-    fnx_1.default.computed
-], AppModel.prototype, "getMostRecentTransaction", null);
+    fnx_1.default.optional
+], AppModel.prototype, "userName", void 0);
 __decorate([
     fnx_1.default.action
-], AppModel.prototype, "createTransaction", null);
+], AppModel.prototype, "setView", null);
+__decorate([
+    fnx_1.default.action
+], AppModel.prototype, "transaction", null);
+__decorate([
+    fnx_1.default.action
+], AppModel.prototype, "setUserName", null);
+__decorate([
+    fnx_1.default.action
+], AppModel.prototype, "createBudget", null);
 exports.AppModel = AppModel;

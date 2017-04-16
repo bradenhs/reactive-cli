@@ -12,7 +12,7 @@ export class Node {
   id = uuid.v4()
   app: express.Application
   server: http.Server
-  io: createIO.Server
+  io: any 
   budget: string
   //collaborators: Node[] = []
 
@@ -21,7 +21,7 @@ export class Node {
     this.app.use(bodyParser.json());
     this.server = http.createServer(this.app)
     this.io = createIO(this.server)
-    let socket: createIO.Socket;
+    let socket: any;
 
     this.budget = "TEST-BUDGET"
 
