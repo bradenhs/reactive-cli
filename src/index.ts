@@ -10,6 +10,7 @@ import { app } from './app'
 import { View } from './models/AppModel'
 import * as Database from './database' 
 import fnx from 'fnx'
+import * as chalk from 'chalk'
 
 const term = terminalKit.terminal
 
@@ -21,7 +22,7 @@ function start() {
     [View.JOIN_OR_CREATE_SELECTION]: displayJoinOrCreateSelection,
     [View.CREATE_BUDGET]: displayCreateBudget,
     [View.JOIN_BUDGET]: displayJoinBudget,
-    [View.WITHDRAW_OR_DEPOSIT_SELECTION]: displayWithdrawOrDepositSelection,
+    [View.ACTION_SELECTION]: displayActionSelection,
     [View.DEPOSIT]: displayDepositSelection,
     [View.WITHDRAW]: displayWithdrawSelection,
   }
@@ -41,7 +42,7 @@ async function displayChooseName() {
     validate: required
   })
   app.transaction(() => {
-    app.setUserName(name)
+    app.setUserName(name.trim())
     app.setView(View.JOIN_OR_CREATE_SELECTION)
   })
 }
@@ -67,8 +68,8 @@ async function displayCreateBudget() {
     validate: required
   })
   app.transaction(() => {
-    app.createBudget(name)
-    app.setView(View.WITHDRAW_OR_DEPOSIT_SELECTION)
+    app.createBudget(name.trim())
+    app.setView(View.ACTION_SELECTION)
   })
 }
 
@@ -87,39 +88,60 @@ async function displayJoinBudget() {
   // app.setView(View.WITHDRAW_OR_DEPOSIT_SELECTION)
 }
 
-async function displayWithdrawOrDepositSelection() {
-  const { choice } = await inquirer.prompt({
-    name: 'choice',
-    message: 'Would you like to record a withdrawl or deposit?',
-    type: 'list',
-    choices: [ 'Widthdraw', 'Deposit' ]
-  })
-  if (choice === 'Widthdraw') {
-    app.setView(View.WITHDRAW)
-  } else {
-    app.setView(View.DEPOSIT)
+async function displayActionSelection() {
+  let confirmShutdown: boolean
+  do {
+    const { choice } = await inquirer.prompt({
+      name: 'choice',
+      message: 'What would you like to do?',
+      type: 'list',
+      choices: [ 'Widthdraw', 'Deposit', 'Shutdown' ]
+    })
+    if (choice === 'Widthdraw') {
+      app.setView(View.WITHDRAW)
+      break
+    } else if (choice === 'Deposit') {
+      app.setView(View.DEPOSIT)
+      break
+    } else {
+      console.log(chalk.yellow(chalk.bold('Warning:') + ' If changes from your machine have not been'))
+      console.log(chalk.yellow('synced with a living node your changes will be lost!'))
+      console.log(chalk.yellow('If all machines in a budget disconnect your budget will'))
+      console.log(chalk.yellow('be lost forever...'))
+      confirmShutdown = (await inquirer.prompt({
+        name: 'confirm',
+        type: 'confirm',
+        message: 'Are you sure you\'d like to continue?',
+        default: false
+      })).confirm
+    }
+  } while (!confirmShutdown)
+  if (confirmShutdown) {
+    term.clear()
   }
 }
 
 async function displayDepositSelection() {
   const { amount } = await inquirer.prompt({
     name: 'amount',
-    message: 'How much would you like to deposit?'
+    message: 'How much would you like to deposit (in dollars)?',
+    validate: combineValidators(required, isNumber)
   })
   app.transaction(() => {
-    createTransaction(parseFloat(amount))
-    app.setView(View.WITHDRAW_OR_DEPOSIT_SELECTION)
+    createTransaction(parseFloat(amount.trim()))
+    app.setView(View.ACTION_SELECTION)
   })
 }
 
 async function displayWithdrawSelection() {
   const { amount } = await inquirer.prompt({
     name: 'amount',
-    message: 'How much would you like to withdraw?'
+    message: 'How much would you like to withdraw (in dollars)?',
+    validate: combineValidators(required, isNumber)
   })
   app.transaction(() => {
-    createTransaction(-parseFloat(amount))
-    app.setView(View.WITHDRAW_OR_DEPOSIT_SELECTION)
+    createTransaction(-parseFloat(amount.trim()))
+    app.setView(View.ACTION_SELECTION)
   })
 }
 
@@ -142,6 +164,14 @@ function combineValidators(...validators: ((value: string) => true | string)[]) 
       }
     }
     return true
+  }
+}
+
+function isNumber(value: string) {
+  if (/^\d+(\.\d+)?$/.test(value.trim())) {
+    return true
+  } else {
+    return 'Should be positive number'
   }
 }
 
