@@ -3,6 +3,7 @@ import * as terminalKit from 'terminal-kit'
 import { AppModel } from './models/AppModel'
 import { reaction } from 'fnx'
 import axios from 'axios'
+import { Node } from './node'
 
 const app = new AppModel({
   transactions: { }
@@ -14,6 +15,10 @@ start()
 
 async function start() {
   term.clear()
+  let node = new Node("test", "localhost:3000", 3000)
+  let node2 = new Node("test", "localhost:3001", 3001)
+  node.start()
+  node2.start()
   while (true) {
     await createTransaction()
   }

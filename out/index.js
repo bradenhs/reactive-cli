@@ -40,6 +40,7 @@ var terminalKit = require("terminal-kit");
 var AppModel_1 = require("./models/AppModel");
 var fnx_1 = require("fnx");
 var axios_1 = require("axios");
+var node_1 = require("./node");
 var app = new AppModel_1.AppModel({
     transactions: {}
 });
@@ -47,10 +48,15 @@ var term = terminalKit.terminal;
 start();
 function start() {
     return __awaiter(this, void 0, void 0, function () {
+        var node, node2;
         return __generator(this, function (_a) {
             switch (_a.label) {
                 case 0:
                     term.clear();
+                    node = new node_1.Node("test", "localhost:3000", 3000);
+                    node2 = new node_1.Node("test", "localhost:3001", 3001);
+                    node.start();
+                    node2.start();
                     _a.label = 1;
                 case 1:
                     if (!true) return [3 /*break*/, 3];
@@ -102,6 +108,9 @@ function setTransactionLocation(id) {
 function startQuestion() {
     term.clear();
     renderStatusBar();
+    console.log();
+    console.log();
+    console.log();
     console.log();
     console.log();
 }
