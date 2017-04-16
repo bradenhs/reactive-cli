@@ -74,15 +74,12 @@ async function displayCreateBudget() {
 }
 
 async function displayJoinBudget() {
-  let test = await Database.getBudgets()
-  console.log(test)
-  let budgets = await Object.keys(Database.getBudgets()).map(key => Database.getBudgets()[key])
-  console.log(budgets)
+  let budgets = await Database.getBudgets()
   const { choice } = await inquirer.prompt({
     name: 'choice',
     message: 'Choose a budget from the list below:',
     type: 'list',
-    choices:  budgets
+    choices:  Object.keys(budgets)
   })
   //throw new Error('Right now this does not work')
   // app.setView(View.WITHDRAW_OR_DEPOSIT_SELECTION)
