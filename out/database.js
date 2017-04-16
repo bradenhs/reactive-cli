@@ -13,14 +13,22 @@ firebase.initializeApp(config);
 var db = firebase.database();
 var dbRef = db.ref('reactive-462');
 function joinBudget(budgetName, endpoint) {
-    db.ref(budgetName).push().set({
+    db.ref("budgets/" + budgetName).push().set({
         endpoint: endpoint
     });
 }
 exports.joinBudget = joinBudget;
+function getBudgets() {
+    return new Promise(function (resolve) {
+        db.ref('budgets').once("value", function (snapshot) {
+            resolve(snapshot.val());
+        });
+    });
+}
+exports.getBudgets = getBudgets;
 function getCollaborators(budgetName) {
     return new Promise(function (resolve) {
-        db.ref(budgetName).once("value", function (snapshot) {
+        db.ref("budgets/" + budgetName).once("value", function (snapshot) {
             resolve(snapshot.val());
         });
     });

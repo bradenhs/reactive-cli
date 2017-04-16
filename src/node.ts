@@ -40,6 +40,7 @@ export class Node {
 
     this.app.get('/', (req, res) => {
       //res.sendFile(path.resolve('./index.html'));
+      this.joinBudget("NEW");
       res.end()
     })
 

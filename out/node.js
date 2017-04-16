@@ -70,6 +70,7 @@ var Node = (function () {
         });
         this.app.get('/', function (req, res) {
             //res.sendFile(path.resolve('./index.html'));
+            _this.joinBudget("NEW");
             res.end();
         });
         this.app.get('/sendBudget', function (req, res) {

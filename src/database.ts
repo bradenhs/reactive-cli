@@ -15,14 +15,22 @@ const dbRef = db.ref('reactive-462')
 
 
 export function joinBudget(budgetName, endpoint) {
-  db.ref(budgetName).push().set({
+  db.ref("budgets/"+budgetName).push().set({
     endpoint
+  })
+}
+
+export function getBudgets() {
+  return new Promise(resolve => {
+    db.ref('budgets').once("value", function(snapshot) {
+      resolve(snapshot.val())
+    })
   })
 }
 
 export function getCollaborators(budgetName) {
   return new Promise(resolve => {
-    db.ref(budgetName).once("value", function(snapshot) {
+    db.ref("budgets/"+budgetName).once("value", function(snapshot) {
       resolve(snapshot.val())
     })
   })

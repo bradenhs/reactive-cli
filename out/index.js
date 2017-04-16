@@ -41,6 +41,7 @@ var axios_1 = require("axios");
 var statusBar_1 = require("./statusBar");
 var app_1 = require("./app");
 var AppModel_1 = require("./models/AppModel");
+var Database = require("./database");
 var fnx_1 = require("fnx");
 var term = terminalKit.terminal;
 start();
@@ -130,8 +131,30 @@ function displayCreateBudget() {
 }
 function displayJoinBudget() {
     return __awaiter(this, void 0, void 0, function () {
+        var test, budgets, choice;
         return __generator(this, function (_a) {
-            throw new Error('Right now this does not work');
+            switch (_a.label) {
+                case 0: return [4 /*yield*/, Database.getBudgets()];
+                case 1:
+                    test = _a.sent();
+                    console.log(test);
+                    return [4 /*yield*/, Object.keys(Database.getBudgets()).map(function (key) { return Database.getBudgets()[key]; })];
+                case 2:
+                    budgets = _a.sent();
+                    console.log(budgets);
+                    return [4 /*yield*/, inquirer.prompt({
+                            name: 'choice',
+                            message: 'Choose a budget from the list below:',
+                            type: 'list',
+                            choices: budgets
+                        })
+                        //throw new Error('Right now this does not work')
+                        // app.setView(View.WITHDRAW_OR_DEPOSIT_SELECTION)
+                    ];
+                case 3:
+                    choice = (_a.sent()).choice;
+                    return [2 /*return*/];
+            }
         });
     });
 }

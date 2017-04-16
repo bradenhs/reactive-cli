@@ -8,6 +8,7 @@ import { times } from 'lodash'
 import { initStatusBar, STATUS_BAR_HEIGHT } from './statusBar'
 import { app } from './app'
 import { View } from './models/AppModel'
+import * as Database from './database' 
 import fnx from 'fnx'
 
 const term = terminalKit.terminal
@@ -72,7 +73,17 @@ async function displayCreateBudget() {
 }
 
 async function displayJoinBudget() {
-  throw new Error('Right now this does not work')
+  let test = await Database.getBudgets()
+  console.log(test)
+  let budgets = await Object.keys(Database.getBudgets()).map(key => Database.getBudgets()[key])
+  console.log(budgets)
+  const { choice } = await inquirer.prompt({
+    name: 'choice',
+    message: 'Choose a budget from the list below:',
+    type: 'list',
+    choices:  budgets
+  })
+  //throw new Error('Right now this does not work')
   // app.setView(View.WITHDRAW_OR_DEPOSIT_SELECTION)
 }
 
