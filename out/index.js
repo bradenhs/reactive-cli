@@ -37,58 +37,165 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
 Object.defineProperty(exports, "__esModule", { value: true });
 var inquirer = require("inquirer");
 var terminalKit = require("terminal-kit");
+var axios_1 = require("axios");
+var statusBar_1 = require("./statusBar");
+var app_1 = require("./app");
 var AppModel_1 = require("./models/AppModel");
 var fnx_1 = require("fnx");
-var axios_1 = require("axios");
-var boxen = require("boxen");
-var app = new AppModel_1.AppModel({
-    transactions: {}
-});
 var term = terminalKit.terminal;
-setInterval(function () { return 0; }, 100);
 start();
-var STATUS_BAR_HEIGHT = 7;
-term.clear();
-term.moveTo(1, STATUS_BAR_HEIGHT);
 function start() {
-    return __awaiter(this, void 0, void 0, function () {
-        return __generator(this, function (_a) {
-            switch (_a.label) {
-                case 0:
-                    term.clear();
-                    _a.label = 1;
-                case 1:
-                    if (!true) return [3 /*break*/, 3];
-                    return [4 /*yield*/, createTransaction()];
-                case 2:
-                    _a.sent();
-                    return [3 /*break*/, 1];
-                case 3: return [2 /*return*/];
-            }
-        });
+    var views = (_a = {},
+        _a[AppModel_1.View.CHOOSE_NAME] = displayChooseName,
+        _a[AppModel_1.View.JOIN_OR_CREATE_SELECTION] = displayJoinOrCreateSelection,
+        _a[AppModel_1.View.CREATE_BUDGET] = displayCreateBudget,
+        _a[AppModel_1.View.JOIN_BUDGET] = displayJoinBudget,
+        _a[AppModel_1.View.WITHDRAW_OR_DEPOSIT_SELECTION] = displayWithdrawOrDepositSelection,
+        _a[AppModel_1.View.DEPOSIT] = displayDepositSelection,
+        _a[AppModel_1.View.WITHDRAW] = displayWithdrawSelection,
+        _a);
+    statusBar_1.initStatusBar();
+    fnx_1.default.reaction(function () {
+        term.moveTo(1, statusBar_1.STATUS_BAR_HEIGHT + 4);
+        term.eraseDisplayBelow();
+        views[app_1.app.view]();
     });
+    var _a;
 }
-function createTransaction() {
+function displayChooseName() {
     return __awaiter(this, void 0, void 0, function () {
-        var amount, id;
+        var name;
         return __generator(this, function (_a) {
             switch (_a.label) {
-                case 0:
-                    startQuestion();
-                    return [4 /*yield*/, inquirer.prompt({
-                            type: 'input',
-                            name: 'answer',
-                            message: 'How much did you spend?',
-                            validate: function (input) { return /\d+/.test(input) ? true : 'Should be a number'; }
-                        })];
+                case 0: return [4 /*yield*/, inquirer.prompt({ name: 'name', message: 'Choose your name' })];
                 case 1:
-                    amount = (_a.sent()).answer;
-                    id = app.createTransaction(parseFloat(amount));
-                    setTransactionLocation(id);
+                    name = (_a.sent()).name;
+                    app_1.app.transaction(function () {
+                        app_1.app.setUserName(name);
+                        app_1.app.setView(AppModel_1.View.JOIN_OR_CREATE_SELECTION);
+                    });
                     return [2 /*return*/];
             }
         });
     });
+}
+function displayJoinOrCreateSelection() {
+    return __awaiter(this, void 0, void 0, function () {
+        var choice;
+        return __generator(this, function (_a) {
+            switch (_a.label) {
+                case 0: return [4 /*yield*/, inquirer.prompt({
+                        name: 'choice',
+                        message: 'Would you like to create a new budget or join an existing one?',
+                        type: 'list',
+                        choices: ['Join', 'Create']
+                    })];
+                case 1:
+                    choice = (_a.sent()).choice;
+                    if (choice === 'Join') {
+                        app_1.app.setView(AppModel_1.View.JOIN_BUDGET);
+                    }
+                    else {
+                        app_1.app.setView(AppModel_1.View.CREATE_BUDGET);
+                    }
+                    return [2 /*return*/];
+            }
+        });
+    });
+}
+function displayCreateBudget() {
+    return __awaiter(this, void 0, void 0, function () {
+        var name;
+        return __generator(this, function (_a) {
+            switch (_a.label) {
+                case 0: return [4 /*yield*/, inquirer.prompt({
+                        name: 'name', message: 'Pick a name for your budget'
+                    })];
+                case 1:
+                    name = (_a.sent()).name;
+                    app_1.app.transaction(function () {
+                        app_1.app.createBudget(name);
+                        app_1.app.setView(AppModel_1.View.WITHDRAW_OR_DEPOSIT_SELECTION);
+                    });
+                    return [2 /*return*/];
+            }
+        });
+    });
+}
+function displayJoinBudget() {
+    return __awaiter(this, void 0, void 0, function () {
+        return __generator(this, function (_a) {
+            throw new Error('Right now this does not work');
+        });
+    });
+}
+function displayWithdrawOrDepositSelection() {
+    return __awaiter(this, void 0, void 0, function () {
+        var choice;
+        return __generator(this, function (_a) {
+            switch (_a.label) {
+                case 0: return [4 /*yield*/, inquirer.prompt({
+                        name: 'choice',
+                        message: 'Would you like to record a withdrawl or deposit?',
+                        type: 'list',
+                        choices: ['Widthdraw', 'Deposit']
+                    })];
+                case 1:
+                    choice = (_a.sent()).choice;
+                    if (choice === 'Widthdraw') {
+                        app_1.app.setView(AppModel_1.View.WITHDRAW);
+                    }
+                    else {
+                        app_1.app.setView(AppModel_1.View.DEPOSIT);
+                    }
+                    return [2 /*return*/];
+            }
+        });
+    });
+}
+function displayDepositSelection() {
+    return __awaiter(this, void 0, void 0, function () {
+        var amount;
+        return __generator(this, function (_a) {
+            switch (_a.label) {
+                case 0: return [4 /*yield*/, inquirer.prompt({
+                        name: 'amount',
+                        message: 'How much would you like to deposit?'
+                    })];
+                case 1:
+                    amount = (_a.sent()).amount;
+                    app_1.app.transaction(function () {
+                        createTransaction(parseFloat(amount));
+                        app_1.app.setView(AppModel_1.View.WITHDRAW_OR_DEPOSIT_SELECTION);
+                    });
+                    return [2 /*return*/];
+            }
+        });
+    });
+}
+function displayWithdrawSelection() {
+    return __awaiter(this, void 0, void 0, function () {
+        var amount;
+        return __generator(this, function (_a) {
+            switch (_a.label) {
+                case 0: return [4 /*yield*/, inquirer.prompt({
+                        name: 'amount',
+                        message: 'How much would you like to withdraw?'
+                    })];
+                case 1:
+                    amount = (_a.sent()).amount;
+                    app_1.app.transaction(function () {
+                        createTransaction(-parseFloat(amount));
+                        app_1.app.setView(AppModel_1.View.WITHDRAW_OR_DEPOSIT_SELECTION);
+                    });
+                    return [2 /*return*/];
+            }
+        });
+    });
+}
+function createTransaction(amount) {
+    var id = app_1.app.budget.createTransaction(amount);
+    setTransactionLocation(id);
 }
 function setTransactionLocation(id) {
     return __awaiter(this, void 0, void 0, function () {
@@ -98,41 +205,9 @@ function setTransactionLocation(id) {
                 case 0: return [4 /*yield*/, axios_1.default.get('http://geoip.nekudo.com/api')];
                 case 1:
                     res = _a.sent();
-                    app.transactions[id].setLocation(res.data.city);
+                    app_1.app.budget.transactions[id].setLocation(res.data.city);
                     return [2 /*return*/];
             }
         });
     });
-}
-function startQuestion() {
-    term.clear();
-    renderStatusBar();
-    term.moveTo(1, STATUS_BAR_HEIGHT);
-}
-fnx_1.reaction(function () {
-    renderStatusBar();
-});
-function renderStatusBar() {
-    term.saveCursor();
-    term.moveTo(1, 1);
-    erase(1, STATUS_BAR_HEIGHT);
-    var output = 'Total $' + app.getTotal() + '\n';
-    var lastTransactionLocation = 'None';
-    if (app.getMostRecentTransaction() != undefined) {
-        lastTransactionLocation = app.getMostRecentTransaction().location;
-    }
-    output += 'Last transaction location: ' + (lastTransactionLocation || 'Fetching...');
-    term(boxen(output, {
-        padding: 1,
-        borderColor: 'cyan'
-    }));
-    term.restoreCursor();
-}
-function erase(from, until) {
-    term.saveCursor();
-    for (var line = from; line <= until; line++) {
-        term.moveTo(1, line);
-        term.eraseLine();
-    }
-    term.restoreCursor();
 }
