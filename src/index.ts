@@ -123,6 +123,7 @@ async function displayActionSelection() {
   if (confirmShutdown) {
     Controller.leave(app)
     term.clear()
+    process.exit(0)
   }
 }
 
