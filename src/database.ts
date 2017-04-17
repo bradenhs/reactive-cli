@@ -15,9 +15,13 @@ const dbRef = db.ref('reactive-462')
 
 
 export function joinBudget(budgetName, endpoint) {
-  db.ref("budgets/"+budgetName).push().set({
-    endpoint
-  })
+  let ref = db.ref("budgets/"+budgetName).push()
+  ref.set({endpoint})
+  return ref.key
+}
+
+export function leaveBudget(budgetName, key) {
+  db.ref("budgets/"+budgetName).child(key).remove()
 }
 
 export function getBudgets() {

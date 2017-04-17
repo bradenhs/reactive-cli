@@ -34,7 +34,7 @@ export class AppModel extends fnx.Model<AppModel> {
   }
 
   @fnx.action
-  createBudget?(name: string) {
+  joinBudget?(name: string) {
     this.budget = {
       budgetName: name,
       transactions: { }

@@ -76,6 +76,7 @@ function formatTransaction(transaction: TransactionModel) {
   }
   let formatted = ''
   formatted += formatMoney(transaction.amount, { addSign: true }) + ' '
-  formatted += 'from ' + (transaction.location || chalk.gray.italic('fetching...'))
+  formatted += 'from ' + (transaction.location || chalk.gray.italic('fetching...')) + ' '
+  formatted += 'by ' + transaction.origin
   return formatted
 }

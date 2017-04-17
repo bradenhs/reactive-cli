@@ -18,7 +18,7 @@ export class BudgetModel extends fnx.Model<{}> {
   @fnx.computed
   getTransactionsOrderedByDateCreated?() {
     return Object.keys(this.transactions).map(id => this.transactions[id]).sort((t1, t2) => {
-      return t1.created.valueOf() < t2.created.valueOf() ? 1 : -1
+      return t1.created < t2.created ? 1 : -1
     })
   }
 
@@ -28,10 +28,10 @@ export class BudgetModel extends fnx.Model<{}> {
   }
 
   @fnx.action
-  createTransaction?(amount: number) {
+  createTransaction?(amount: number, origin: string) {
     const id = uuid.v4()
     this.transactions[id] = {
-      amount, id, created: new Date()
+      amount, id, origin, created: Date.now()
     }
     return id
   }

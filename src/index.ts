@@ -11,8 +11,11 @@ import { View } from './models/AppModel'
 import * as Database from './database' 
 import fnx from 'fnx'
 import * as chalk from 'chalk'
+import * as Controller from './controller'
+import { Node } from './node'
 
 const term = terminalKit.terminal
+let port = random(3000, 3090)
 
 start()
 
@@ -32,7 +35,7 @@ function start() {
     term.moveTo(1, STATUS_BAR_HEIGHT + 4)
     term.eraseDisplayBelow()
     views[app.view]()
-  })
+  })  
 }
 
 async function displayChooseName() {
@@ -68,8 +71,9 @@ async function displayCreateBudget() {
     validate: required
   })
   app.transaction(() => {
-    app.createBudget(name.trim())
+    app.joinBudget(name.trim())
     app.setView(View.ACTION_SELECTION)
+    Controller.join(app, port)
   })
 }
 
@@ -81,8 +85,11 @@ async function displayJoinBudget() {
     type: 'list',
     choices:  Object.keys(budgets)
   })
-  //throw new Error('Right now this does not work')
-  // app.setView(View.WITHDRAW_OR_DEPOSIT_SELECTION)
+  app.transaction(() => {
+    app.joinBudget(choice)
+    Controller.join(app, port)
+    app.setView(View.ACTION_SELECTION)
+  })
 }
 
 async function displayActionSelection() {
@@ -114,6 +121,7 @@ async function displayActionSelection() {
     }
   } while (!confirmShutdown)
   if (confirmShutdown) {
+    Controller.leave(app)
     term.clear()
   }
 }
@@ -143,13 +151,15 @@ async function displayWithdrawSelection() {
 }
 
 function createTransaction(amount) {
-  const id = app.budget.createTransaction(amount)
+  const id = app.budget.createTransaction(amount, app.userName)
   setTransactionLocation(id)
+  Controller.sendTransaction(app)
 }
 
 async function setTransactionLocation(id) {
   const res = await axios.get('http://geoip.nekudo.com/api')
   app.budget.transactions[id].setLocation(res.data.city)
+  Controller.updateTransaction(app)
 }
 
 function combineValidators(...validators: ((value: string) => true | string)[]) {
@@ -178,4 +188,8 @@ function required(value: string) {
   } else {
     return 'Required'
   }
+}
+
+function random(min, max) {
+    return Math.round(Math.random() * (max - min) + min)
 }
